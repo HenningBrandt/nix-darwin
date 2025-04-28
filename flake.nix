@@ -13,14 +13,17 @@
 
   outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs }:
   let
-    configuration = systemPlatform: { pkgs, ... }: {
+    configuration = systemPlatform: hostname: { pkgs, ... }: {
       # Let Determinate manage nix itself
       nix.enable = false;
       
       # Allow unfree software to be installed, like Obsidian
       nixpkgs.config.allowUnfree = true;
 
-      networking.hostName = "Hennings-Intel-MacBook-Pro";
+      networking.hostName = hostname;
+
+      # sudo with Touch ID
+      security.pam.services.sudo_local.touchIdAuth = true;
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
@@ -31,7 +34,6 @@
           mediainfo
           direnv
           bat
-          alacritty
           jq
           tree
         ];
@@ -39,6 +41,33 @@
       fonts.packages = with pkgs;
       	[ monaspace
       	];
+
+      environment.variables.HOMEBREW_NO_ANALYTICS = "1";
+
+      homebrew = {
+        enable = true;
+
+        onActivation = {
+          autoUpdate = true;
+          cleanup = "zap";
+          upgrade = true;
+        };
+
+        casks = [
+          "Arc"
+          "1Password"
+          "Raycast"
+          "Ghostty"
+          "xcodes"
+          "MakeMKV"
+          "handbrake"
+          "Fork"
+        ];
+
+        masApps = {
+          Ivory = 6444602274;
+        };
+      };
 
       # Enable alternative shell support in nix-darwin.
       # programs.fish.enable = true;
@@ -53,19 +82,28 @@
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = systemPlatform;
     };
+    mkHomeConfig = username: {
+      users.users.${username}.home = "/Users/${username}";
+      home-manager.useGlobalPkgs = true;
+      home-manager.useUserPackages = true;
+      home-manager.users.${username} = import ./home.nix; 
+    };
   in
   {
     # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#personal-macbook
-    darwinConfigurations."personal-macbook" = nix-darwin.lib.darwinSystem {
+    # $ darwin-rebuild build --flake .#intel-macbook
+    darwinConfigurations."intel-macbook" = nix-darwin.lib.darwinSystem {
       modules =
-      	[ (configuration "x86_64-darwin")
-          home-manager.darwinModules.home-manager {
-            users.users.henning.home = "/Users/henning";
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.henning = import ./home.nix;
-          }
+      	[ (configuration "x86_64-darwin" "Hennings-MacBook-Intel")
+          home-manager.darwinModules.home-manager (mkHomeConfig "henning")
+      	];
+    };
+    # Build darwin flake using:
+    # $ darwin-rebuild build --flake .#m4-macbook
+    darwinConfigurations."m4-macbook" = nix-darwin.lib.darwinSystem {
+      modules =
+      	[ (configuration "aarch64-darwin" "Hennings-MacBook-M4")
+          home-manager.darwinModules.home-manager (mkHomeConfig "henning")
       	];
     };
   };

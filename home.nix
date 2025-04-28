@@ -7,7 +7,7 @@
   
   home.file = {
     ".config/nvim/init.lua".source = ./dotfiles/nvim.lua;
-    ".config/alacritty.toml".source = ./dotfiles/alacritty.toml;
+    ".config/ghostty/config".source = ./dotfiles/ghostty.config;
   };
 
   programs.zsh = {
@@ -16,7 +16,8 @@
       ls = "ls --color";
       la = "ls -la --color";
       c = "clear";
-      switch-personal = "darwin-rebuild switch --flake ~/.config/nix-darwin#personal-macbook";
+      switch-intel = "darwin-rebuild switch --flake ~/.config/nix-darwin#intel-macbook";
+      switch-m4 = "darwin-rebuild switch --flake ~/.config/nix-darwin#m4-macbook";
     };
     initExtra = ''
       eval "$(direnv hook zsh)"
