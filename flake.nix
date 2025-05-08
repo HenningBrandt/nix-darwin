@@ -22,8 +22,45 @@
 
       networking.hostName = hostname;
 
-      # sudo with Touch ID
-      security.pam.services.sudo_local.touchIdAuth = true;
+      # sudo with Touch ID and Apple Watch
+      security.pam.services.sudo_local = {
+        touchIdAuth = true;
+        watchIdAuth = true;
+      };
+
+      system.defaults = {
+        # Show clock as Mo 14:42
+        menuExtraClock = {
+          Show24Hour = true;
+          ShowDate = 2; # Never
+          ShowDayOfWeek = true;
+          ShowSeconds = false;
+          FlashDateSeparators = false;
+        };
+
+        dock = {
+          autohide = true;
+          autohide-delay = 0.1;
+          autohide-time-modifier = 0.2;
+          minimize-to-application = true;
+          orientation = "left";
+        };
+
+        finder = {
+          ShowPathbar = true;
+          FXDefaultSearchScope = "SCcf"; # Current folder
+          FXPreferredViewStyle = "clmv"; # Column view
+          ShowExternalHardDrivesOnDesktop = false;
+          ShowRemovableMediaOnDesktop = false;
+          _FXSortFoldersFirst = true;
+          FXEnableExtensionChangeWarning = false;
+          NewWindowTarget = "Documents";
+        };
+
+        trackpad = {
+          TrackpadThreeFingerDrag = true;
+        };
+      };
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
@@ -62,6 +99,7 @@
           "MakeMKV"
           "handbrake"
           "Fork"
+          "yaak"
         ];
 
         masApps = {
